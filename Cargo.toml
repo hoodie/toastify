@@ -3,6 +3,9 @@ name = "notify-rust-cli"
 version = "0.1.0"
 authors = ["Hendrik Sollich <hendrik@hoodie.de>"]
 
+[[bin]]
+name = "notify-rust"
+
 [dependencies.clap]
 version = "1.0"
 features = [ "suggestions", "color" ]
