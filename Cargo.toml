@@ -6,9 +6,14 @@ authors = ["Hendrik Sollich <hendrik@hoodie.de>"]
 [[bin]]
 name = "notify"
 
+[dependencies]
+notify-rust = "~3.1"
+clippy = {version = "*", optional = true}
+
 [dependencies.clap]
-version = "~1.1"
+version = "2.1"
 features = [ "suggestions", "color" ]
 
-[dependencies.notify-rust]
-path = "../"
+[features]
+default = []
+dev = ["clippy"]

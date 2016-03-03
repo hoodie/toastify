@@ -1,12 +1,18 @@
+#![cfg_attr(feature = "dev", allow(unstable_features))]
+#![cfg_attr(feature = "dev", feature(plugin))]
+#![cfg_attr(feature = "dev", plugin(clippy))]
+
 extern crate notify_rust;
 #[macro_use]
 extern crate clap;
 
+use std::io::Write;
+
 use notify_rust::Notification;
-use clap::{App, SubCommand, Arg};
+use clap::{App, AppSettings, SubCommand, Arg};
 
 arg_enum!{
-pub enum NotificationUrgency{ Low, Medium, High }
+pub enum NotificationUrgency{Low, Normal, Critical}
 }
 
 fn main() {
@@ -16,6 +22,7 @@ fn main() {
                         .version(&crate_version!()[..])
                         .author("Hendrik Sollich <hendrik@hoodie.de>")
                         .about("notify-send in rust")
+                        .setting(AppSettings::ArgRequiredElseHelp)
                         .subcommand(SubCommand::with_name("send")
                                     .about("Shows a notification")
                                     // {{{
@@ -76,26 +83,21 @@ fn main() {
     if let Some(_matches) = matches.subcommand_matches("server")
     {
         use std::thread;
-
         use notify_rust::Notification;
         use notify_rust::server::NotificationServer;
         let mut server = NotificationServer::new();
         thread::spawn(move||{
-            server.start(
-                |appname, _id, icon, summary, body, actions, hints, counter |
-                println!("[{counter}]  ({icon}) appname: {appname:?}\nsummary: {summary}\nbody:    {body}\nactions:     {actions}\nhints:     {hints}\n",
-                appname = appname, icon = icon, summary = summary, body = body, actions = actions, hints = hints, counter = counter)
-                );
+            server.start( |notification| println!("{:#?}", notification))
         });
 
         println!("Press enter to exit.\n");
 
-        std::thread::sleep_ms(1_000);
+        std::thread::sleep(std::time::Duration::from_millis(1_000));
 
         Notification::new()
             .summary("Notification Logger")
             .body("If you can read this in the console, the server works fine.")
-            .show();
+            .show().ok().expect("Was not able to send initial test message");
 
         let mut _devnull = String::new();
         let _ = std::io::stdin().read_line(&mut _devnull);
@@ -106,8 +108,8 @@ fn main() {
 
     else if let Some(_matches) = matches.subcommand_matches("info")
     {
-        println!("server information:\n {:?}\n", notify_rust::get_server_information());
-        println!("capabilities:\n {:?}\n", notify_rust::get_capabilities());
+        println!("server information:\n {:?}\n", notify_rust::get_server_information().unwrap());
+        println!("capabilities:\n {:?}\n", notify_rust::get_capabilities().unwrap());
     }
 
 
@@ -148,16 +150,16 @@ fn main() {
             let urgency = value_t_or_exit!(matches.value_of("urgency"), NotificationUrgency);
             // TODO: somebody make this a cast, please!
             match urgency {
-                NotificationUrgency::Low => notification.urgency(notify_rust::NotificationUrgency::Low),
-                NotificationUrgency::Medium => notification.urgency(notify_rust::NotificationUrgency::Medium),
-                NotificationUrgency::High => notification.urgency(notify_rust::NotificationUrgency::High),
+                NotificationUrgency::Low      => notification.urgency(notify_rust::NotificationUrgency::Low),
+                NotificationUrgency::Normal   => notification.urgency(notify_rust::NotificationUrgency::Normal),
+                NotificationUrgency::Critical => notification.urgency(notify_rust::NotificationUrgency::Critical),
             };
         }
 
         if matches.is_present("debug"){
-            notification.show_debug();
+            notification.show_debug().unwrap();
         } else {
-            notification.show();
+            notification.show().unwrap();
         }
 
     }
