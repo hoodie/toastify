@@ -1,0 +1,28 @@
+# Maintainer: hendrik@hoodie.de
+_pkgname=notify
+#pkgname=${_pkgname}-git
+pkgname=notify-rust-cli
+pkgver=v0.2.0.r0.g0e90b3e
+pkgrel=1
+pkgdesc='Replacement for notify-send written in Rust.'
+arch=('i686' 'x86_64')
+url="https://github.com/hoodie/notify-rust-cli"
+license=('MIT/Apache-2.0')
+depends=('libdbus')
+makedepends=('rust' 'cargo')
+source=("git+https://github.com/hoodie/notify-rust-cli.git")
+md5sums=('SKIP')
+
+pkgver() {
+    cd "$srcdir/$pkgname/"
+    git describe --long | sed 's/\([^-]*-g\)/r\1/;s/-/./g'
+}
+
+build() {
+    cd "$srcdir/$pkgname/"
+    cargo build --release
+}
+
+package() {
+    install -Dm755  "$srcdir/$pkgname/target/release/$_pkgname" "$pkgdir/usr/bin/$_pkgname"
+}
