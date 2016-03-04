@@ -1,10 +1,7 @@
 [package]
-name = "notify-rust-cli"
-version = "0.2.0"
+name = "toastify"
+version = "0.3.0"
 authors = ["Hendrik Sollich <hendrik@hoodie.de>"]
-
-[[bin]]
-name = "notify"
 
 [dependencies]
 notify-rust = "~3.1"

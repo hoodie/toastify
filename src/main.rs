@@ -18,10 +18,10 @@ pub enum NotificationUrgency{Low, Normal, Critical}
 fn main() {
     let urgencies = ["low","normal","high"];
 
-    let matches = App::new("notify-rust")
+    let matches = App::new("toastify")
                         .version(&crate_version!()[..])
                         .author("Hendrik Sollich <hendrik@hoodie.de>")
-                        .about("notify-send in rust")
+                        .about("sending desktop notifications since 2015")
                         .setting(AppSettings::ArgRequiredElseHelp)
                         .subcommand(SubCommand::with_name("send")
                                     .about("Shows a notification")
@@ -101,7 +101,7 @@ fn main() {
 
         let mut _devnull = String::new();
         let _ = std::io::stdin().read_line(&mut _devnull);
-        println!("Thank you for choosing notify-rust.");
+        println!("Thank you for choosing toastify.");
     }
 
 

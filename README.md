@@ -1,29 +1,23 @@
-# notify-rust
+# toastify
 
 A commandline tool that shows desktop notifications using [notify-rust](http://hoodie.github.io/notify-rust/.)
 
 ```
-notify-rust-cli 0.1.0
+toastify 0.3.0
 Hendrik Sollich <hendrik@hoodie.de>
-notify-send in rust
+sending desktop notifications since 2015
 
 USAGE:
-	notify-rust-cli [FLAGS] [OPTIONS] [ARGS] <summary>
+	toastify [FLAGS] [SUBCOMMAND]
 
 FLAGS:
-    -d, --debug      Also prints notification to stdout
     -h, --help       Prints help information
     -V, --version    Prints version information
 
-OPTIONS:
-    -a, --app-name <app-name>              Set a specific app-name manually.
-    -c, --category <category>              Set a category.
-    -t, --expire-time <expire-time>        Time until expiration in milliseconds. 0 means forever. 
-    -i, --icon <icon>                      Icon of notification.
-    -u, --urgency <urgency>                How urgent is it. [values: high, low, normal]
-
-ARGS:
-    summary      Title of the Notification.
-    body         Message body
+SUBCOMMANDS:
+    help      Prints this message
+    info      Shows information about the running notification server
+    send      Shows a notification
+    server    Starts a little notification server for testing
 
 ```
