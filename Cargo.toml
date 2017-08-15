@@ -4,11 +4,11 @@ version = "0.3.0"
 authors = ["Hendrik Sollich <hendrik@hoodie.de>"]
 
 [dependencies]
-notify-rust = "~3.1"
+notify-rust = {git= "https://github.com/hoodie/notify-rust/"}
 clippy = {version = "*", optional = true}
 
 [dependencies.clap]
-version = "2.1"
+version = "2"
 features = [ "suggestions", "color" ]
 
 [features]

@@ -1,7 +1,7 @@
 # Maintainer: hendrik@hoodie.de
 _pkgname=toastify
 pkgname=${_pkgname}-git
-pkgver=v0.2.0.r2.gb473b4d
+pkgver=v0.3.0.r0.gdee957d
 pkgrel=1
 pkgdesc='Replacement for notify-send written in Rust.'
 arch=('i686' 'x86_64')

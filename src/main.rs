@@ -9,10 +9,21 @@ extern crate clap;
 use std::io::Write;
 
 use notify_rust::Notification;
+use notify_rust::hints;
+use notify_rust::hints::NotificationHint as Hint;
 use clap::{App, AppSettings, SubCommand, Arg};
 
 arg_enum!{
 pub enum NotificationUrgency{Low, Normal, Critical}
+}
+
+fn parse_hint(pattern:&str){
+    let parts = pattern.split(':').collect::<Vec<&str>>();
+    assert_eq!(parts.len(), 3);
+    println!("{:?}", parts);
+    let (typ, name, value) = ( parts[0], parts[1], parts[2] );
+    let hint = hints::hint_from_key_val(name,value).unwrap();
+    println!("{:?}", hint);
 }
 
 fn main() {
@@ -50,6 +61,12 @@ fn main() {
                                           .short("i")
                                           .help("Icon of notification.")
                                           .long("icon")
+                                          .takes_value(true))
+
+                                    .arg( Arg::with_name("hint")
+                                          .help("Specifies basic extra data to pass. Valid types are int, double, string and byte. Pattern: TYPE:NAME:VALUE")
+                                          .short("h")
+                                          .long("hint")
                                           .takes_value(true))
 
                                     .arg( Arg::with_name("category")
@@ -154,6 +171,12 @@ fn main() {
                 NotificationUrgency::Normal   => notification.urgency(notify_rust::NotificationUrgency::Normal),
                 NotificationUrgency::Critical => notification.urgency(notify_rust::NotificationUrgency::Critical),
             };
+        }
+
+        if let Some(hint) = matches.value_of("hint"){
+            println!("{:?}", hint);
+            parse_hint(hint);
+            std::process::exit(0);
         }
 
         if matches.is_present("debug"){
