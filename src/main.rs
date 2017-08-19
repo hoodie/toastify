@@ -6,11 +6,8 @@ extern crate notify_rust;
 #[macro_use]
 extern crate clap;
 
-use std::io::Write;
-
 use notify_rust::Notification;
 use notify_rust::hints;
-use notify_rust::hints::NotificationHint as Hint;
 use clap::{App, AppSettings, SubCommand, Arg};
 
 arg_enum!{
@@ -21,7 +18,7 @@ fn parse_hint(pattern:&str){
     let parts = pattern.split(':').collect::<Vec<&str>>();
     assert_eq!(parts.len(), 3);
     println!("{:?}", parts);
-    let (typ, name, value) = ( parts[0], parts[1], parts[2] );
+    let (_typ, name, value) = ( parts[0], parts[1], parts[2] );
     let hint = hints::hint_from_key_val(name,value).unwrap();
     println!("{:?}", hint);
 }
@@ -99,34 +96,44 @@ fn main() {
 
     if let Some(_matches) = matches.subcommand_matches("server")
     {
-        use std::thread;
-        use notify_rust::Notification;
-        use notify_rust::server::NotificationServer;
-        let mut server = NotificationServer::new();
-        thread::spawn(move||{
-            server.start( |notification| println!("{:#?}", notification))
-        });
+        #[cfg(all(unix, not(target_os = "macos")))] {
+            use std::thread;
+            use notify_rust::Notification;
+            use notify_rust::server::NotificationServer;
+            let mut server = NotificationServer::new();
+            thread::spawn(move||{
+                server.start( |notification| println!("{:#?}", notification))
+            });
 
-        println!("Press enter to exit.\n");
+            println!("Press enter to exit.\n");
 
-        std::thread::sleep(std::time::Duration::from_millis(1_000));
+            std::thread::sleep(std::time::Duration::from_millis(1_000));
 
-        Notification::new()
-            .summary("Notification Logger")
-            .body("If you can read this in the console, the server works fine.")
-            .show().ok().expect("Was not able to send initial test message");
+            Notification::new()
+                .summary("Notification Logger")
+                .body("If you can read this in the console, the server works fine.")
+                .show().ok().expect("Was not able to send initial test message");
 
-        let mut _devnull = String::new();
-        let _ = std::io::stdin().read_line(&mut _devnull);
-        println!("Thank you for choosing toastify.");
+            let mut _devnull = String::new();
+            let _ = std::io::stdin().read_line(&mut _devnull);
+            println!("Thank you for choosing toastify.");
+        }
+        #[cfg(target_os = "macos")] {
+            println!("this feature is not implemented on macOS")
+        }
     }
 
 
 
     else if let Some(_matches) = matches.subcommand_matches("info")
     {
-        println!("server information:\n {:?}\n", notify_rust::get_server_information().unwrap());
-        println!("capabilities:\n {:?}\n", notify_rust::get_capabilities().unwrap());
+        #[cfg(all(unix, not(target_os = "macos")))] {
+            println!("server information:\n {:?}\n", notify_rust::get_server_information().unwrap());
+            println!("capabilities:\n {:?}\n", notify_rust::get_capabilities().unwrap());
+        }
+        #[cfg(target_os = "macos")] {
+            println!("this feature is not implemented on macOS")
+        }
     }
 
 
@@ -180,7 +187,12 @@ fn main() {
         }
 
         if matches.is_present("debug"){
-            notification.show_debug().unwrap();
+            #[cfg(all(unix, not(target_os = "macos")))] {
+                notification.show_debug().unwrap();
+            }
+            #[cfg(target_os = "macos")] {
+                println!("this feature is not implemented on macOS")
+            }
         } else {
             notification.show().unwrap();
         }
