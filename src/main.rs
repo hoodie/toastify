@@ -1,30 +1,26 @@
-#![cfg_attr(feature = "dev", allow(unstable_features))]
-#![cfg_attr(feature = "dev", feature(plugin))]
-#![cfg_attr(feature = "dev", plugin(clippy))]
-
 extern crate notify_rust;
 #[macro_use]
 extern crate clap;
 
-use notify_rust::Notification;
+use clap::{App, AppSettings, Arg, SubCommand};
 use notify_rust::hints;
-use clap::{App, AppSettings, SubCommand, Arg};
+use notify_rust::Notification;
 
 arg_enum!{
 pub enum NotificationUrgency{Low, Normal, Critical}
 }
 
-fn parse_hint(pattern:&str){
+fn parse_hint(pattern: &str) {
     let parts = pattern.split(':').collect::<Vec<&str>>();
     assert_eq!(parts.len(), 3);
     println!("{:?}", parts);
-    let (_typ, name, value) = ( parts[0], parts[1], parts[2] );
-    let hint = hints::hint_from_key_val(name,value).unwrap();
+    let (_typ, name, value) = (parts[0], parts[1], parts[2]);
+    let hint = hints::hint_from_key_val(name, value).unwrap();
     println!("{:?}", hint);
 }
 
 fn main() {
-    let urgencies = ["low","normal","high"];
+    let urgencies = ["low", "normal", "high"];
 
     let matches = App::new("toastify")
                         .version(&crate_version!()[..])
@@ -94,16 +90,14 @@ fn main() {
 
                         .get_matches();
 
-    if let Some(_matches) = matches.subcommand_matches("server")
-    {
-        #[cfg(all(unix, not(target_os = "macos")))] {
-            use std::thread;
-            use notify_rust::Notification;
+    if let Some(_matches) = matches.subcommand_matches("server") {
+        #[cfg(all(unix, not(target_os = "macos")))]
+        {
             use notify_rust::server::NotificationServer;
+            use notify_rust::Notification;
+            use std::thread;
             let mut server = NotificationServer::new();
-            thread::spawn(move||{
-                server.start( |notification| println!("{:#?}", notification))
-            });
+            thread::spawn(move || server.start(|notification| println!("{:#?}", notification)));
 
             println!("Press enter to exit.\n");
 
@@ -112,90 +106,102 @@ fn main() {
             Notification::new()
                 .summary("Notification Logger")
                 .body("If you can read this in the console, the server works fine.")
-                .show().ok().expect("Was not able to send initial test message");
+                .show()
+                .expect("Was not able to send initial test message");
 
             let mut _devnull = String::new();
             let _ = std::io::stdin().read_line(&mut _devnull);
             println!("Thank you for choosing toastify.");
         }
-        #[cfg(target_os = "macos")] {
+        #[cfg(target_os = "macos")]
+        {
             println!("this feature is not implemented on macOS")
         }
-    }
-
-
-
-    else if let Some(_matches) = matches.subcommand_matches("info")
-    {
-        #[cfg(all(unix, not(target_os = "macos")))] {
-            println!("server information:\n {:?}\n", notify_rust::get_server_information().unwrap());
-            println!("capabilities:\n {:?}\n", notify_rust::get_capabilities().unwrap());
+    } else if let Some(_matches) = matches.subcommand_matches("info") {
+        #[cfg(all(unix, not(target_os = "macos")))]
+        {
+            println!(
+                "server information:\n {:?}\n",
+                notify_rust::get_server_information().unwrap()
+            );
+            println!(
+                "capabilities:\n {:?}\n",
+                notify_rust::get_capabilities().unwrap()
+            );
         }
-        #[cfg(target_os = "macos")] {
+        #[cfg(target_os = "macos")]
+        {
             println!("this feature is not implemented on macOS")
         }
-    }
-
-
-
-    else if let Some(matches) = matches.subcommand_matches("send")
-    {
+    } else if let Some(matches) = matches.subcommand_matches("send") {
         let mut notification = Notification::new();
 
         let summary = matches.value_of("summary").unwrap();
         notification.summary(summary);
 
-        if let Some(appname) = matches.value_of("app-name"){
+        if let Some(appname) = matches.value_of("app-name") {
             notification.appname(appname);
         }
 
-        if let Some(icon) = matches.value_of("icon"){
+        if let Some(icon) = matches.value_of("icon") {
             notification.icon(icon);
         }
 
-        if let Some(body) = matches.value_of("body"){
+        if let Some(body) = matches.value_of("body") {
             notification.body(body);
         }
 
-        if let Some(categories) = matches.value_of("category"){
+        if let Some(categories) = matches.value_of("category") {
             //notification.body(body);
-            for category in categories.split(':'){
+            for category in categories.split(':') {
                 notification.hint(notify_rust::NotificationHint::Category(category.to_owned()));
             }
         }
 
-        if let Some(timeout_string) = matches.value_of("expire-time"){
-            if let Ok(timeout) = timeout_string.parse::<i32>(){
-                notification.timeout(timeout); }
-            else {println!("can't parse timeout {:?}, please use a number", timeout_string);}
+        if let Some(timeout_string) = matches.value_of("expire-time") {
+            if let Ok(timeout) = timeout_string.parse::<i32>() {
+                notification.timeout(timeout);
+            } else {
+                println!(
+                    "can't parse timeout {:?}, please use a number",
+                    timeout_string
+                );
+            }
         }
 
         if matches.is_present("urgency") {
             let urgency = value_t_or_exit!(matches.value_of("urgency"), NotificationUrgency);
             // TODO: somebody make this a cast, please!
             match urgency {
-                NotificationUrgency::Low      => notification.urgency(notify_rust::NotificationUrgency::Low),
-                NotificationUrgency::Normal   => notification.urgency(notify_rust::NotificationUrgency::Normal),
-                NotificationUrgency::Critical => notification.urgency(notify_rust::NotificationUrgency::Critical),
+                NotificationUrgency::Low => {
+                    notification.urgency(notify_rust::NotificationUrgency::Low)
+                }
+                NotificationUrgency::Normal => {
+                    notification.urgency(notify_rust::NotificationUrgency::Normal)
+                }
+                NotificationUrgency::Critical => {
+                    notification.urgency(notify_rust::NotificationUrgency::Critical)
+                }
             };
         }
 
-        if let Some(hint) = matches.value_of("hint"){
+        if let Some(hint) = matches.value_of("hint") {
             println!("{:?}", hint);
             parse_hint(hint);
             std::process::exit(0);
         }
 
-        if matches.is_present("debug"){
-            #[cfg(all(unix, not(target_os = "macos")))] {
+        if matches.is_present("debug") {
+            #[cfg(all(unix, not(target_os = "macos")))]
+            {
                 notification.show_debug().unwrap();
             }
-            #[cfg(target_os = "macos")] {
+            #[cfg(target_os = "macos")]
+            {
                 println!("this feature is not implemented on macOS")
             }
         } else {
             notification.show().unwrap();
         }
-
     }
 }
