@@ -3,14 +3,13 @@ name = "toastify"
 version = "0.3.1"
 authors = ["Hendrik Sollich <hendrik@hoodie.de>"]
 
+keywords = ["desktop", "notification", "notify", "dbus", "libnotify"]
+license = "MIT/Apache-2.0"
+readme = "README.md"
+
 [dependencies]
 notify-rust = {git= "https://github.com/hoodie/notify-rust/"}
-clippy = {version = "*", optional = true}
 
 [dependencies.clap]
 version = "2"
 features = [ "suggestions", "color" ]
-
-[features]
-default = []
-dev = ["clippy"]
