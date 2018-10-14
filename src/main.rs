@@ -120,14 +120,15 @@ fn main() {
     } else if let Some(_matches) = matches.subcommand_matches("info") {
         #[cfg(all(unix, not(target_os = "macos")))]
         {
-            println!(
-                "server information:\n {:?}\n",
-                notify_rust::get_server_information().unwrap()
-            );
-            println!(
-                "capabilities:\n {:?}\n",
-                notify_rust::get_capabilities().unwrap()
-            );
+            match notify_rust::get_server_information() {
+                Ok(info) => println!("server information:\n {:?}\n", info),
+                Err(error) => eprintln!("{}", error)
+            }
+
+            match notify_rust::get_capabilities() {
+                Ok(caps) => println!("capabilities:\n {:?}\n", caps),
+                Err(error) => eprintln!("{}", error)
+            }
         }
         #[cfg(target_os = "macos")]
         {
@@ -194,14 +195,18 @@ fn main() {
         if matches.is_present("debug") {
             #[cfg(all(unix, not(target_os = "macos")))]
             {
-                notification.show_debug().unwrap();
+            if let Err(error) = notification.show_debug() {
+                eprintln!("{}", error)
+            }
             }
             #[cfg(target_os = "macos")]
             {
                 println!("this feature is not implemented on macOS")
             }
         } else {
-            notification.show().unwrap();
+            if let Err(error) = notification.show() {
+                eprintln!("{}", error)
+            }
         }
     }
 }
