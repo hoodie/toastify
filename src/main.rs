@@ -96,8 +96,8 @@ fn main() {
             use notify_rust::server::NotificationServer;
             use notify_rust::Notification;
             use std::thread;
-            let mut server = NotificationServer::new();
-            thread::spawn(move || server.start(|notification| println!("{:#?}", notification)));
+            let server = NotificationServer::new();
+            thread::spawn(move || NotificationServer::start(&server, |notification| println!("{:#?}", notification)));
 
             println!("Press enter to exit.\n");
 
