@@ -14,3 +14,7 @@ notify-rust = "3.5"
 [dependencies.clap]
 version = "2"
 features = [ "suggestions", "color" ]
+
+cargo-features = ["publish-lockfile"]
+[project]
+publish-lockfile = true
