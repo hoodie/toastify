@@ -1,10 +1,25 @@
-before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -y libdbus-1-dev
 language: rust
-rust:
-  - 1.0.0
-  - stable
-  - nightly
+
+matrix:
+    allow_failures:
+        - rust: nightly
+    fast_finish: true
+    include:
+        - os: osx
+
+        - os: linux
+          rust: stable
+          before_install:
+            - sudo apt-get update -qq
+            - sudo apt-get install -y libdbus-1-dev
+        - os: linux
+          rust: nightly
+          before_install:
+            - sudo apt-get update -qq
+            - sudo apt-get install -y libdbus-1-dev
+
 script:
   - cargo build --verbose
+  - cargo run --verbose || true
+
+cache: cargo
