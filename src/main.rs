@@ -94,9 +94,8 @@ fn main() {
         #[cfg(all(unix, not(target_os = "macos")))]
         {
             use notify_rust::server::NotificationServer;
-            use notify_rust::Notification;
             use std::thread;
-            let server = NotificationServer::new();
+            let server = NotificationServer::create();
             thread::spawn(move || NotificationServer::start(&server, |notification| println!("{:#?}", notification)));
 
             println!("Press enter to exit.\n");
