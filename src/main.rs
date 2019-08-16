@@ -56,6 +56,11 @@ fn main() {
                                           .long("icon")
                                           .takes_value(true))
 
+                                    .arg( Arg::with_name("ID")
+                                          .help("Specifies the ID and overrides existing notifications with the same ID.")
+                                          .long("id")
+                                          .takes_value(true))
+
                                     .arg( Arg::with_name("hint")
                                           .help("Specifies basic extra data to pass. Valid types are int, double, string and byte. Pattern: TYPE:NAME:VALUE")
                                           .short("h")
@@ -183,6 +188,11 @@ fn main() {
                     notification.urgency(notify_rust::NotificationUrgency::Critical)
                 }
             };
+        }
+
+        if let Some(id) = matches.value_of("ID") {
+            let id = id.parse::<u32>().expect("The id has to be an unsigned integer");
+            notification.id(id);
         }
 
         if let Some(hint) = matches.value_of("hint") {
