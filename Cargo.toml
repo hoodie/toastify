@@ -9,8 +9,11 @@ keywords = ["desktop", "notification", "notify", "dbus", "libnotify"]
 license = "MIT/Apache-2.0"
 readme = "README.md"
 
-[dependencies]
+[target.'cfg(any(macos, windows))'.dependencies]
 notify-rust = "4"
+
+[target.'cfg(all(unix, not(macos)))'.dependencies]
+notify-rust = { version = "4", features = ["dbus", "server"] }
 
 [dependencies.clap]
 version = "3.0.0-beta.2"
