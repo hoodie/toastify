@@ -1,107 +1,98 @@
-extern crate notify_rust;
-#[macro_use]
-extern crate clap;
+#[cfg(all(unix, not(target_os = "macos")))]
+use std::convert::TryFrom;
+use std::ffi::OsString;
 
-use clap::{App, AppSettings, Arg, SubCommand};
-use notify_rust::hints;
+use clap::{crate_authors, crate_description, crate_version, Clap};
+use notify_rust;
 use notify_rust::Notification;
 
-arg_enum!{
-pub enum NotificationUrgency{Low, Normal, Critical}
+#[cfg(all(unix, not(target_os = "macos")))]
+use notify_rust::{Hint, Urgency};
+
+#[cfg(all(unix, not(target_os = "macos")))]
+fn parse_urgency(s: &str) -> Result<Urgency, notify_rust::Error> {
+    <Urgency as TryFrom<&str>>::try_from(s)
 }
 
-fn parse_hint(pattern: &str) {
-    let parts = pattern.split(':').collect::<Vec<&str>>();
-    assert_eq!(parts.len(), 3);
-    println!("{:?}", parts);
-    let (_typ, name, value) = (parts[0], parts[1], parts[2]);
-    let hint = hints::hint_from_key_val(name, value).unwrap();
-    println!("{:?}", hint);
+#[cfg(all(unix, not(target_os = "macos")))]
+fn parse_hint(pattern: &str) -> Result<Hint, String> {
+    let parts = pattern.splitn(2, ':').collect::<Vec<&str>>();
+    let (name, value) = (parts[0], parts[1]);
+    Hint::from_key_val(name, value)
+}
+/// Shows a notification.
+#[derive(Clap)]
+struct Send {
+    /// Title / Summary of the Notification.
+    summary: String,
+
+    /// Message body.
+    body: Option<String>,
+
+    /// Set a specific app-name manually.
+    #[clap(short = 'a', long)]
+    app_name: Option<String>,
+
+    /// Time until expiration in milliseconds. 0 means forever. -1 means the server decides
+    #[clap(short = 't', long)]
+    expire_time: Option<i32>,
+
+    /// Icon of notification.
+    #[clap(short, long)]
+    icon: Option<OsString>,
+
+    /// Specifies the ID and overrides existing notifications with the same ID.
+    #[clap(long)]
+    id: Option<u32>,
+
+    /// Set a category.
+    #[cfg(all(unix, not(target_os = "macos")))]
+    #[clap(short, long)]
+    category: Option<Vec<String>>,
+
+    /// Also prints notification to stdout.
+    #[clap(short, long)]
+    debug: bool,
+
+    // Specifies basic extra data to pass. Valid types are int, double, string and byte. Pattern: TYPE:NAME:VALUE
+    #[cfg(all(unix, not(target_os = "macos")))]
+    #[clap(short, long, parse(try_from_str = parse_hint))]
+    hint: Option<Hint>,
+
+    /// How urgent is it.
+    #[cfg(all(unix, not(target_os = "macos")))]
+    #[clap(short, long, parse(try_from_str = parse_urgency))]
+    urgency: Option<Urgency>,
+}
+
+#[derive(Clap)]
+#[clap(author = crate_authors!(), version = crate_version!(), about = crate_description!())]
+enum Toastify {
+    /// Shows a notification.
+    Send(Send),
+
+    /// Shows information about the running notification server.
+    #[cfg(all(unix, not(target_os = "macos")))]
+    Info,
+
+    /// Starts a little notification server for testing.
+    #[cfg(all(unix, not(target_os = "macos")))]
+    Server,
 }
 
 fn main() {
-    let urgencies = ["low", "normal", "high"];
+    let args = Toastify::parse();
 
-    let matches = App::new("toastify")
-                        .version(&crate_version!()[..])
-                        .author("Hendrik Sollich <hendrik@hoodie.de>")
-                        .about("sending desktop notifications since 2015")
-                        .setting(AppSettings::ArgRequiredElseHelp)
-                        .subcommand(SubCommand::with_name("send")
-                                    .about("Shows a notification")
-                                    // {{{
-
-                                    .arg( Arg::with_name("summary")
-                                          .help("Title of the Notification.")
-                                          .required(true))
-
-                                    .arg( Arg::with_name("body")
-                                          .help("Message body"))
-
-                                    .arg( Arg::with_name("app-name")
-                                          .help("Set a specific app-name manually.")
-                                          .short("a")
-                                          .long("app-name")
-                                          .takes_value(true))
-
-                                    .arg( Arg::with_name("expire-time")
-                                          .help("Time until expiration in milliseconds. 0 means forever. ")
-                                          .short("t")
-                                          .long("expire-time")
-                                          .takes_value(true))
-
-                                    .arg( Arg::with_name("icon")
-                                          .short("i")
-                                          .help("Icon of notification.")
-                                          .long("icon")
-                                          .takes_value(true))
-
-                                    .arg( Arg::with_name("ID")
-                                          .help("Specifies the ID and overrides existing notifications with the same ID.")
-                                          .long("id")
-                                          .takes_value(true))
-
-                                    .arg( Arg::with_name("hint")
-                                          .help("Specifies basic extra data to pass. Valid types are int, double, string and byte. Pattern: TYPE:NAME:VALUE")
-                                          .short("h")
-                                          .long("hint")
-                                          .takes_value(true))
-
-                                    .arg( Arg::with_name("category")
-                                          .help("Set a category.")
-                                          .short("c")
-                                          .long("category")
-                                          .takes_value(true))
-
-                                    .arg( Arg::with_name("urgency")
-                                          .help("How urgent is it.")
-                                          .short("u")
-                                          .long("urgency")
-                                          .takes_value(true)
-                                          .possible_values(&urgencies))
-
-                                    .arg( Arg::with_name("debug")
-                                          .help("Also prints notification to stdout")
-                                          .short("d")
-                                          .long("debug"))
-                                    //}}}
-                                    )
-                        .subcommand(SubCommand::with_name("info")
-                                    .about("Shows information about the running notification server")
-                                    )
-                        .subcommand(SubCommand::with_name("server")
-                                    .about("Starts a little notification server for testing")
-                                    )
-
-                        .get_matches();
-
-    if let Some(_matches) = matches.subcommand_matches("server") {
+    match args {
         #[cfg(all(unix, not(target_os = "macos")))]
-        {
+        Toastify::Server => {
             use notify_rust::server::NotificationServer;
             use std::thread;
+
             let server = NotificationServer::create();
-            thread::spawn(move || NotificationServer::start(&server, |notification| println!("{:#?}", notification)));
+            thread::spawn(move || {
+                NotificationServer::start(&server, |notification| println!("{:#?}", notification))
+            });
 
             println!("Press enter to exit.\n");
 
@@ -117,104 +108,72 @@ fn main() {
             let _ = std::io::stdin().read_line(&mut _devnull);
             println!("Thank you for choosing toastify.");
         }
-        #[cfg(target_os = "macos")]
-        {
-            println!("this feature is not implemented on macOS")
-        }
-    } else if let Some(_matches) = matches.subcommand_matches("info") {
         #[cfg(all(unix, not(target_os = "macos")))]
-        {
+        Toastify::Info => {
             match notify_rust::get_server_information() {
                 Ok(info) => println!("server information:\n {:?}\n", info),
-                Err(error) => eprintln!("{}", error)
+                Err(error) => eprintln!("{}", error),
             }
 
             match notify_rust::get_capabilities() {
                 Ok(caps) => println!("capabilities:\n {:?}\n", caps),
-                Err(error) => eprintln!("{}", error)
+                Err(error) => eprintln!("{}", error),
             }
         }
-        #[cfg(target_os = "macos")]
-        {
-            println!("this feature is not implemented on macOS")
-        }
-    } else if let Some(matches) = matches.subcommand_matches("send") {
-        let mut notification = Notification::new();
+        Toastify::Send(send) => {
+            let mut notification = Notification::new();
 
-        let summary = matches.value_of("summary").unwrap();
-        notification.summary(summary);
+            notification.summary(&send.summary);
 
-        if let Some(appname) = matches.value_of("app-name") {
-            notification.appname(appname);
-        }
-
-        if let Some(icon) = matches.value_of("icon") {
-            notification.icon(icon);
-        }
-
-        if let Some(body) = matches.value_of("body") {
-            notification.body(body);
-        }
-
-        if let Some(categories) = matches.value_of("category") {
-            //notification.body(body);
-            for category in categories.split(':') {
-                notification.hint(notify_rust::NotificationHint::Category(category.to_owned()));
+            if let Some(appname) = send.app_name {
+                notification.appname(&appname);
             }
-        }
 
-        if let Some(timeout_string) = matches.value_of("expire-time") {
-            if let Ok(timeout) = timeout_string.parse::<i32>() {
-                notification.timeout(timeout);
-            } else {
-                println!(
-                    "can't parse timeout {:?}, please use a number",
-                    timeout_string
-                );
+            if let Some(icon) = send.icon {
+                notification.icon(icon.to_str().unwrap());
             }
-        }
 
-        if matches.is_present("urgency") {
-            let urgency = value_t_or_exit!(matches.value_of("urgency"), NotificationUrgency);
-            // TODO: somebody make this a cast, please!
-            match urgency {
-                NotificationUrgency::Low => {
-                    notification.urgency(notify_rust::NotificationUrgency::Low)
-                }
-                NotificationUrgency::Normal => {
-                    notification.urgency(notify_rust::NotificationUrgency::Normal)
-                }
-                NotificationUrgency::Critical => {
-                    notification.urgency(notify_rust::NotificationUrgency::Critical)
-                }
-            };
-        }
+            if let Some(body) = send.body {
+                notification.body(&body);
+            }
 
-        if let Some(id) = matches.value_of("ID") {
-            let id = id.parse::<u32>().expect("The id has to be an unsigned integer");
-            notification.id(id);
-        }
-
-        if let Some(hint) = matches.value_of("hint") {
-            println!("{:?}", hint);
-            parse_hint(hint);
-            std::process::exit(0);
-        }
-
-        if matches.is_present("debug") {
             #[cfg(all(unix, not(target_os = "macos")))]
-            {
-            if let Err(error) = notification.show_debug() {
-                eprintln!("{}", error)
+            if let Some(categories) = send.category {
+                categories.iter().for_each(|category| {
+                    notification.hint(notify_rust::Hint::Category(category.to_owned()));
+                })
             }
+
+            if let Some(timeout) = send.expire_time {
+                if timeout >= -1 {
+                    notification.timeout(timeout);
+                } else {
+                    println!(
+                        "Timeout should be -1, 0, or positive. {} is invalid",
+                        timeout
+                    );
+                }
             }
-            #[cfg(target_os = "macos")]
-            {
-                println!("this feature is not implemented on macOS")
+
+            #[cfg(all(unix, not(target_os = "macos")))]
+            if let Some(urgency) = send.urgency {
+                notification.urgency(urgency);
             }
-        } else {
-            if let Err(error) = notification.show() {
-                eprintln!("{}", error)
+
+            if let Some(id) = send.id {
+                notification.id(id);
+            }
+
+            #[cfg(all(unix, not(target_os = "macos")))]
+            if let Some(hint) = send.hint {
+                notification.hint(hint);
+            }
+
+            if send.debug {
+                dbg!(notification);
+                // println!("{:?}", notification);
+            } else {
+                notification.show().unwrap();
             }
         }
     }
