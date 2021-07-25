@@ -3,15 +3,14 @@ name = "toastify"
 version = "0.4.0"
 edition = "2018"
 authors = ["Hendrik Sollich <hendrik@hoodie.de>"]
-description = "A commandline tool that shows desktop notifications using [notify-rust](http://hoodie.github.io/notify-rust/.)"
+description = "A commandline tool that shows desktop notifications using [notify-rust](https://hoodie.github.io/notify-rust/)"
 
 keywords = ["desktop", "notification", "notify", "dbus", "libnotify"]
 license = "MIT/Apache-2.0"
 readme = "README.md"
 
 [dependencies]
-notify-rust = "3.6"
+notify-rust = "4"
 
 [dependencies.clap]
-version = "2"
-features = [ "suggestions", "color" ]
+version = "3.0.0-beta.2"
