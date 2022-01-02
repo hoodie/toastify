@@ -1,10 +1,20 @@
 use clap::{arg_enum, crate_version, App, AppSettings, Arg, SubCommand};
 #[cfg(all(unix, not(target_os = "macos")))]
 use notify_rust::hints;
-use notify_rust::Notification;
+use notify_rust::{Notification, Urgency};
 
 arg_enum!{
 pub enum NotificationUrgency{Low, Normal, Critical}
+}
+
+impl From<NotificationUrgency> for Urgency {
+    fn from(urgency: NotificationUrgency) -> Self {
+        match urgency {
+            NotificationUrgency::Low => Self::Low,
+            NotificationUrgency::Normal => Self::Normal,
+            NotificationUrgency::Critical => Self::Critical,
+        }
+    }
 }
 
 #[cfg(all(unix, not(target_os = "macos")))]
@@ -175,18 +185,7 @@ fn main() {
         #[cfg(all(unix, not(target_os = "macos")))]
         if matches.is_present("urgency") {
             let urgency = value_t_or_exit!(matches.value_of("urgency"), NotificationUrgency);
-            // TODO: somebody make this a cast, please!
-            match urgency {
-                NotificationUrgency::Low => {
-                    notification.urgency(notify_rust::NotificationUrgency::Low)
-                }
-                NotificationUrgency::Normal => {
-                    notification.urgency(notify_rust::NotificationUrgency::Normal)
-                }
-                NotificationUrgency::Critical => {
-                    notification.urgency(notify_rust::NotificationUrgency::Critical)
-                }
-            };
+            notification.urgency(urgency.into());
         }
 
         if let Some(id) = matches.value_of("ID") {
