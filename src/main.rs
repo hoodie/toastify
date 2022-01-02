@@ -3,8 +3,8 @@ use clap::{arg_enum, crate_version, App, AppSettings, Arg, SubCommand};
 use notify_rust::hints;
 use notify_rust::{Notification, Urgency};
 
-arg_enum!{
-pub enum NotificationUrgency{Low, Normal, Critical}
+arg_enum! {
+    pub enum NotificationUrgency{Low, Normal, Critical}
 }
 
 impl From<NotificationUrgency> for Urgency {
@@ -109,7 +109,9 @@ fn main() {
             use notify_rust::server::NotificationServer;
             use std::thread;
             let server = NotificationServer::create();
-            thread::spawn(move || NotificationServer::start(&server, |notification| println!("{:#?}", notification)));
+            thread::spawn(move || {
+                NotificationServer::start(&server, |notification| println!("{:#?}", notification))
+            });
 
             println!("Press enter to exit.\n");
 
@@ -134,12 +136,12 @@ fn main() {
         {
             match notify_rust::get_server_information() {
                 Ok(info) => println!("server information:\n {:?}\n", info),
-                Err(error) => eprintln!("{}", error)
+                Err(error) => eprintln!("{}", error),
             }
 
             match notify_rust::get_capabilities() {
                 Ok(caps) => println!("capabilities:\n {:?}\n", caps),
-                Err(error) => eprintln!("{}", error)
+                Err(error) => eprintln!("{}", error),
             }
         }
         #[cfg(target_os = "macos")]
@@ -189,7 +191,9 @@ fn main() {
         }
 
         if let Some(id) = matches.value_of("ID") {
-            let id = id.parse::<u32>().expect("The id has to be an unsigned integer");
+            let id = id
+                .parse::<u32>()
+                .expect("The id has to be an unsigned integer");
             notification.id(id);
         }
 
@@ -203,9 +207,9 @@ fn main() {
         if matches.is_present("debug") {
             #[cfg(all(unix, not(target_os = "macos")))]
             {
-            if let Err(error) = notification.show_debug() {
-                eprintln!("{}", error)
-            }
+                if let Err(error) = notification.show_debug() {
+                    eprintln!("{}", error)
+                }
             }
             #[cfg(target_os = "macos")]
             {
