@@ -31,7 +31,7 @@ fn main() {
     let urgencies = ["low", "normal", "high"];
 
     let matches = App::new("toastify")
-                        .version(&crate_version!()[..])
+                        .version(crate_version!())
                         .author("Hendrik Sollich <hendrik@hoodie.de>")
                         .about("sending desktop notifications since 2015")
                         .setting(AppSettings::ArgRequiredElseHelp)
