@@ -1,8 +1,4 @@
-extern crate notify_rust;
-#[macro_use]
-extern crate clap;
-
-use clap::{App, AppSettings, Arg, SubCommand};
+use clap::{arg_enum, crate_version, App, AppSettings, Arg, SubCommand};
 #[cfg(all(unix, not(target_os = "macos")))]
 use notify_rust::hints;
 use notify_rust::Notification;
