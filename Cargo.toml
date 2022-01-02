@@ -13,5 +13,5 @@ readme = "README.md"
 notify-rust = "4.5"
 
 [dependencies.clap]
-version = "2"
-features = [ "suggestions", "color" ]
+version = "3.0.0"
+features = [ "derive", "cargo" ]
