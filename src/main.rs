@@ -3,6 +3,7 @@ extern crate notify_rust;
 extern crate clap;
 
 use clap::{App, AppSettings, Arg, SubCommand};
+#[cfg(all(unix, not(target_os = "macos")))]
 use notify_rust::hints;
 use notify_rust::Notification;
 
@@ -10,6 +11,7 @@ arg_enum!{
 pub enum NotificationUrgency{Low, Normal, Critical}
 }
 
+#[cfg(all(unix, not(target_os = "macos")))]
 fn parse_hint(pattern: &str) {
     let parts = pattern.split(':').collect::<Vec<&str>>();
     assert_eq!(parts.len(), 3);
@@ -156,8 +158,8 @@ fn main() {
             notification.body(body);
         }
 
+        #[cfg(all(unix, not(target_os = "macos")))]
         if let Some(categories) = matches.value_of("category") {
-            //notification.body(body);
             for category in categories.split(':') {
                 notification.hint(notify_rust::NotificationHint::Category(category.to_owned()));
             }
@@ -174,6 +176,7 @@ fn main() {
             }
         }
 
+        #[cfg(all(unix, not(target_os = "macos")))]
         if matches.is_present("urgency") {
             let urgency = value_t_or_exit!(matches.value_of("urgency"), NotificationUrgency);
             // TODO: somebody make this a cast, please!
@@ -195,6 +198,7 @@ fn main() {
             notification.id(id);
         }
 
+        #[cfg(all(unix, not(target_os = "macos")))]
         if let Some(hint) = matches.value_of("hint") {
             println!("{:?}", hint);
             parse_hint(hint);
