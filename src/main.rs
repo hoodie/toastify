@@ -1,111 +1,96 @@
-use clap::{arg_enum, crate_version, App, AppSettings, Arg, SubCommand};
+use clap::{ArgEnum, Parser, Subcommand};
+use notify_rust::{error::Result as nResult, Notification, Urgency};
 #[cfg(all(unix, not(target_os = "macos")))]
-use notify_rust::hints;
-use notify_rust::{Notification, Urgency};
+use notify_rust::Hint;
 
-arg_enum! {
-    pub enum NotificationUrgency{Low, Normal, Critical}
+#[derive(ArgEnum, Clone, Copy)]
+pub enum UrgencyShim {
+    Low,
+    Normal,
+    Critical,
 }
 
-impl From<NotificationUrgency> for Urgency {
-    fn from(urgency: NotificationUrgency) -> Self {
+impl From<UrgencyShim> for Urgency {
+    fn from(urgency: UrgencyShim) -> Urgency {
         match urgency {
-            NotificationUrgency::Low => Self::Low,
-            NotificationUrgency::Normal => Self::Normal,
-            NotificationUrgency::Critical => Self::Critical,
+            UrgencyShim::Low => Urgency::Low,
+            UrgencyShim::Normal => Urgency::Normal,
+            UrgencyShim::Critical => Urgency::Critical,
         }
     }
 }
 
 #[cfg(all(unix, not(target_os = "macos")))]
-fn parse_hint(pattern: &str) {
+fn parse_hint(pattern: &str) -> Result<Hint, String> {
     let parts = pattern.split(':').collect::<Vec<&str>>();
-    assert_eq!(parts.len(), 3);
-    println!("{:?}", parts);
+    if parts.len() != 3 {
+        return Err("Wrong number of segments".into());
+    }
     let (_typ, name, value) = (parts[0], parts[1], parts[2]);
-    let hint = hints::hint_from_key_val(name, value).unwrap();
-    println!("{:?}", hint);
+    Hint::from_key_val(name, value)
 }
 
-fn main() {
-    let urgencies = ["low", "normal", "high"];
+#[derive(Parser)]
+#[clap(author, version, about)]
+struct Cli {
+    #[clap(subcommand)]
+    command: Commands,
+}
 
-    let matches = App::new("toastify")
-                        .version(crate_version!())
-                        .author("Hendrik Sollich <hendrik@hoodie.de>")
-                        .about("sending desktop notifications since 2015")
-                        .setting(AppSettings::ArgRequiredElseHelp)
-                        .subcommand(SubCommand::with_name("send")
-                                    .about("Shows a notification")
-                                    // {{{
-
-                                    .arg( Arg::with_name("summary")
-                                          .help("Title of the Notification.")
-                                          .required(true))
-
-                                    .arg( Arg::with_name("body")
-                                          .help("Message body"))
-
-                                    .arg( Arg::with_name("app-name")
-                                          .help("Set a specific app-name manually.")
-                                          .short("a")
-                                          .long("app-name")
-                                          .takes_value(true))
-
-                                    .arg( Arg::with_name("expire-time")
-                                          .help("Time until expiration in milliseconds. 0 means forever. ")
-                                          .short("t")
-                                          .long("expire-time")
-                                          .takes_value(true))
-
-                                    .arg( Arg::with_name("icon")
-                                          .short("i")
-                                          .help("Icon of notification.")
-                                          .long("icon")
-                                          .takes_value(true))
-
-                                    .arg( Arg::with_name("ID")
-                                          .help("Specifies the ID and overrides existing notifications with the same ID.")
-                                          .long("id")
-                                          .takes_value(true))
-
-                                    .arg( Arg::with_name("hint")
-                                          .help("Specifies basic extra data to pass. Valid types are int, double, string and byte. Pattern: TYPE:NAME:VALUE")
-                                          .short("h")
-                                          .long("hint")
-                                          .takes_value(true))
-
-                                    .arg( Arg::with_name("category")
-                                          .help("Set a category.")
-                                          .short("c")
-                                          .long("category")
-                                          .takes_value(true))
-
-                                    .arg( Arg::with_name("urgency")
-                                          .help("How urgent is it.")
-                                          .short("u")
-                                          .long("urgency")
-                                          .takes_value(true)
-                                          .possible_values(&urgencies))
-
-                                    .arg( Arg::with_name("debug")
-                                          .help("Also prints notification to stdout")
-                                          .short("d")
-                                          .long("debug"))
-                                    //}}}
-                                    )
-                        .subcommand(SubCommand::with_name("info")
-                                    .about("Shows information about the running notification server")
-                                    )
-                        .subcommand(SubCommand::with_name("server")
-                                    .about("Starts a little notification server for testing")
-                                    )
-
-                        .get_matches();
-
-    if let Some(_matches) = matches.subcommand_matches("server") {
+#[derive(Subcommand)]
+enum Commands {
+    /// Starts a little notification server for testing
+    #[cfg(all(unix, not(target_os = "macos")))]
+    Server,
+    /// Shows information about the running notification server
+    #[cfg(all(unix, not(target_os = "macos")))]
+    Info,
+    /// Shows a notification
+    Send {
+        /// Title of the Notification.
+        title: String,
+        /// Message body
+        body: Option<String>,
+        /// Set a specific app-name manually.
+        #[clap(short, long)]
+        app_name: Option<String>,
         #[cfg(all(unix, not(target_os = "macos")))]
-        {
+        #[clap(flatten)]
+        linux_args: LinuxArgs,
+    },
+}
+
+#[cfg(all(unix, not(target_os = "macos")))]
+#[derive(clap::Args)]
+struct LinuxArgs {
+    /// Time until expiration in milliseconds.
+    #[clap(short = 't', long)]
+    expire_time: Option<i32>,
+    /// Icon of notification.
+    #[clap(short = 'i', long)]
+    icon: Option<std::path::PathBuf>,
+    /// Specifies the ID and overrides existing notifications with the same ID.
+    id: Option<u32>, // TODO: Type is u32 or string?
+    /// Set a category.
+    #[clap(short, long)]
+    categories: Option<Vec<String>>,
+    /// Specifies basic extra data to pass. Valid types are int, double, string and byte. Pattern: TYPE:NAME:VALUE
+    #[clap(long, parse(try_from_str = parse_hint))]
+    hint: Option<Hint>,
+    /// How urgent is it.
+    #[clap(short, long, arg_enum)]
+    urgency: Option<UrgencyShim>,
+    /// Also prints notification to stdout
+    #[clap(short, long)]
+    debug: bool,
+}
+
+fn main() -> nResult<()> {
+    let args = Cli::parse();
+
+    match args.command {
+        #[cfg(all(unix, not(target_os = "macos")))]
+        Commands::Server => {
             use notify_rust::server::NotificationServer;
             use std::thread;
             let server = NotificationServer::create();
@@ -127,13 +112,8 @@ fn main() {
             let _ = std::io::stdin().read_line(&mut _devnull);
             println!("Thank you for choosing toastify.");
         }
-        #[cfg(target_os = "macos")]
-        {
-            println!("this feature is not implemented on macOS")
-        }
-    } else if let Some(_matches) = matches.subcommand_matches("info") {
         #[cfg(all(unix, not(target_os = "macos")))]
-        {
+        Commands::Info => {
             match notify_rust::get_server_information() {
                 Ok(info) => println!("server information:\n {:?}\n", info),
                 Err(error) => eprintln!("{}", error),
@@ -144,81 +124,72 @@ fn main() {
                 Err(error) => eprintln!("{}", error),
             }
         }
-        #[cfg(target_os = "macos")]
-        {
-            println!("this feature is not implemented on macOS")
-        }
-    } else if let Some(matches) = matches.subcommand_matches("send") {
-        let mut notification = Notification::new();
+        Commands::Send {
+            title,
+            body,
+            app_name,
+            #[cfg(all(unix, not(target_os = "macos")))]
+            linux_args,
+        } => {
+            let mut notification = Notification::new();
 
-        let summary = matches.value_of("summary").unwrap();
-        notification.summary(summary);
+            notification.summary(&title);
 
-        if let Some(appname) = matches.value_of("app-name") {
-            notification.appname(appname);
-        }
-
-        if let Some(icon) = matches.value_of("icon") {
-            notification.icon(icon);
-        }
-
-        if let Some(body) = matches.value_of("body") {
-            notification.body(body);
-        }
-
-        #[cfg(all(unix, not(target_os = "macos")))]
-        if let Some(categories) = matches.value_of("category") {
-            for category in categories.split(':') {
-                notification.hint(notify_rust::NotificationHint::Category(category.to_owned()));
+            if let Some(body) = body {
+                notification.body(&body);
             }
-        }
 
-        if let Some(timeout_string) = matches.value_of("expire-time") {
-            if let Ok(timeout) = timeout_string.parse::<i32>() {
-                notification.timeout(timeout);
-            } else {
-                println!(
-                    "can't parse timeout {:?}, please use a number",
-                    timeout_string
-                );
+            if let Some(appname) = app_name {
+                notification.appname(&appname);
             }
-        }
 
-        #[cfg(all(unix, not(target_os = "macos")))]
-        if matches.is_present("urgency") {
-            let urgency = value_t_or_exit!(matches.value_of("urgency"), NotificationUrgency);
-            notification.urgency(urgency.into());
-        }
-
-        if let Some(id) = matches.value_of("ID") {
-            let id = id
-                .parse::<u32>()
-                .expect("The id has to be an unsigned integer");
-            notification.id(id);
-        }
-
-        #[cfg(all(unix, not(target_os = "macos")))]
-        if let Some(hint) = matches.value_of("hint") {
-            println!("{:?}", hint);
-            parse_hint(hint);
-            std::process::exit(0);
-        }
-
-        if matches.is_present("debug") {
             #[cfg(all(unix, not(target_os = "macos")))]
             {
-                if let Err(error) = notification.show_debug() {
-                    eprintln!("{}", error)
+                let LinuxArgs {
+                    expire_time,
+                    icon,
+                    id,
+                    categories,
+                    hint,
+                    urgency,
+                    debug,
+                } = linux_args;
+                if let Some(id) = id {
+                    notification.id(id);
                 }
+
+                if let Some(icon) = icon {
+                    notification.icon(icon.to_str().expect("Icon path is not valid unicode"));
+                }
+
+                if let Some(timeout) = expire_time {
+                    notification.timeout(timeout);
+                }
+
+                if let Some(urgency) = urgency {
+                    notification.urgency(urgency.into())
+                }
+
+                if let Some(hint) = hint {
+                    notification.hint(hint);
+                }
+
+                if let Some(categories) = categories {
+                    for category in categories {
+                        notification.hint(Hint::Category(category));
+                    }
+                }
+
+                if debug {
+                    notification.show_debug()
+                } else {
+                    notification.show()
+                }
+                .map(|_| ())
             }
+
             #[cfg(target_os = "macos")]
-            {
-                println!("this feature is not implemented on macOS")
-            }
-        } else {
-            if let Err(error) = notification.show() {
-                eprintln!("{}", error)
-            }
+            notification.show().map(|_| ())
         }
     }
 }
