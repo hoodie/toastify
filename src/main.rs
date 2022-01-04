@@ -114,15 +114,12 @@ fn main() -> nResult<()> {
         // }
         #[cfg(all(unix, not(target_os = "macos")))]
         Commands::Info => {
-            match notify_rust::get_server_information() {
-                Ok(info) => println!("server information:\n {:?}\n", info),
-                Err(error) => eprintln!("{}", error),
-            }
+            let info = notify_rust::get_server_information()?;
+            println!("server information:\n {:?}\n", info);
 
-            match notify_rust::get_capabilities() {
-                Ok(caps) => println!("capabilities:\n {:?}\n", caps),
-                Err(error) => eprintln!("{}", error),
-            }
+            let caps = notify_rust::get_capabilities()?;
+            println!("capabilities:\n {:?}\n", caps);
+            Ok(())
         }
         Commands::Send {
             title,
@@ -167,7 +164,7 @@ fn main() -> nResult<()> {
                 }
 
                 if let Some(urgency) = urgency {
-                    notification.urgency(urgency.into())
+                    notification.urgency(urgency.into());
                 }
 
                 if let Some(hint) = hint {
