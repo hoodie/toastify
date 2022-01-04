@@ -1,7 +1,7 @@
 use clap::{ArgEnum, Parser, Subcommand};
-use notify_rust::{error::Result as nResult, Notification, Urgency};
 #[cfg(all(unix, not(target_os = "macos")))]
 use notify_rust::Hint;
+use notify_rust::{error::Result as nResult, Notification, Urgency};
 
 #[derive(ArgEnum, Clone, Copy)]
 pub enum UrgencyShim {
@@ -39,9 +39,9 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    /// Starts a little notification server for testing
-    #[cfg(all(unix, not(target_os = "macos")))]
-    Server,
+    // /// Starts a little notification server for testing
+    // #[cfg(all(unix, not(target_os = "macos")))]
+    // Server,
     /// Shows information about the running notification server
     #[cfg(all(unix, not(target_os = "macos")))]
     Info,
@@ -89,29 +89,29 @@ fn main() -> nResult<()> {
     let args = Cli::parse();
 
     match args.command {
-        #[cfg(all(unix, not(target_os = "macos")))]
-        Commands::Server => {
-            use notify_rust::server::NotificationServer;
-            use std::thread;
-            let server = NotificationServer::create();
-            thread::spawn(move || {
-                NotificationServer::start(&server, |notification| println!("{:#?}", notification))
-            });
+        // #[cfg(all(unix, not(target_os = "macos")))]
+        // Commands::Server => {
+        //     use notify_rust::server::NotificationServer;
+        //     use std::thread;
+        //     let server = NotificationServer::create();
+        //     thread::spawn(move || {
+        //         NotificationServer::start(&server, |notification| println!("{:#?}", notification))
+        //     });
 
-            println!("Press enter to exit.\n");
+        //     println!("Press enter to exit.\n");
 
-            std::thread::sleep(std::time::Duration::from_millis(1_000));
+        //     std::thread::sleep(std::time::Duration::from_millis(1_000));
 
-            Notification::new()
-                .summary("Notification Logger")
-                .body("If you can read this in the console, the server works fine.")
-                .show()
-                .expect("Was not able to send initial test message");
+        //     Notification::new()
+        //         .summary("Notification Logger")
+        //         .body("If you can read this in the console, the server works fine.")
+        //         .show()
+        //         .expect("Was not able to send initial test message");
 
-            let mut _devnull = String::new();
-            let _ = std::io::stdin().read_line(&mut _devnull);
-            println!("Thank you for choosing toastify.");
-        }
+        //     let mut _devnull = String::new();
+        //     let _ = std::io::stdin().read_line(&mut _devnull);
+        //     println!("Thank you for choosing toastify.");
+        // }
         #[cfg(all(unix, not(target_os = "macos")))]
         Commands::Info => {
             match notify_rust::get_server_information() {
