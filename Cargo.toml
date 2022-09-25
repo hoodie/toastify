@@ -1,9 +1,9 @@
 [package]
 edition = '2018'
 name = "toastify"
-version = "0.4.0"
+version = "0.5.0"
 authors = ["Hendrik Sollich <hendrik@hoodie.de>"]
-description = "A commandline tool that shows desktop notifications using [notify-rust](http://hoodie.github.io/notify-rust/)."
+description = "A commandline tool that shows desktop notifications using [notify-rust](https://docs.rs/notify-rust/)."
 
 keywords = ["desktop", "notification", "notify", "dbus", "libnotify"]
 license = "MIT/Apache-2.0"

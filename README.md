@@ -1,9 +1,9 @@
 # toastify
 
-A commandline tool that shows desktop notifications using [notify-rust](http://hoodie.github.io/notify-rust/.)
+A commandline tool that shows desktop notifications using [notify-rust](https://docs.rs/notify-rust/).
 
 ```
-toastify 0.3.0
+toastify 0.5.0
 Hendrik Sollich <hendrik@hoodie.de>
 sending desktop notifications since 2015
 
