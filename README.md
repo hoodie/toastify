@@ -2,22 +2,21 @@
 
 A commandline tool that shows desktop notifications using [notify-rust](https://docs.rs/notify-rust/).
 
-```
-toastify 0.5.0
+```text
+toastify 0.5.1
 Hendrik Sollich <hendrik@hoodie.de>
-sending desktop notifications since 2015
+A commandline tool that shows desktop notifications using
+[notify-rust](https://docs.rs/notify-rust/).
 
 USAGE:
-	toastify [FLAGS] [SUBCOMMAND]
+    toastify <SUBCOMMAND>
 
-FLAGS:
-    -h, --help       Prints help information
-    -V, --version    Prints version information
+OPTIONS:
+    -h, --help       Print help information
+    -V, --version    Print version information
 
 SUBCOMMANDS:
-    help      Prints this message
-    info      Shows information about the running notification server
-    send      Shows a notification
-    server    Starts a little notification server for testing
-
+    help    Print this message or the help of the given subcommand(s)
+    info    Shows information about the running notification server
+    send    Shows a notification
 ```
