@@ -185,7 +185,7 @@ fn main() -> nResult<()> {
                 .map(|_| ())
             }
 
-            #[cfg(target_os = "macos")]
+            #[cfg(any(target_os = "macos", target_os = "windows"))]
             notification.show().map(|_| ())
         }
     }
