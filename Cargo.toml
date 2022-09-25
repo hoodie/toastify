@@ -12,6 +12,12 @@ readme = "README.md"
 [dependencies]
 notify-rust = "4.5"
 
+[features]
+default = ["z"]
+d = ["notify-rust/d"]
+z = ["notify-rust/z"]
+images = ["notify-rust/images"]
+
 [dependencies.clap]
 version = "3.0.0"
 features = [ "derive", "cargo" ]
