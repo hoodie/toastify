@@ -178,6 +178,7 @@ fn main() -> nResult<()> {
                 }
 
                 if debug {
+                    #[allow(deprecated)]
                     notification.show_debug()
                 } else {
                     notification.show()
