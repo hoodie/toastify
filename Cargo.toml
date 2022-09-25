@@ -9,8 +9,9 @@ keywords = ["desktop", "notification", "notify", "dbus", "libnotify"]
 license = "MIT/Apache-2.0"
 readme = "README.md"
 
-[dependencies]
-notify-rust = "4.5"
+[dependencies.notify-rust]
+version = "4.5"
+default-features = false
 
 [features]
 default = ["z"]
