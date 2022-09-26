@@ -1,5 +1,7 @@
 # Changelog
 
+### [v0.5.2](https://github.com/hoodie/toastify/compare/v0.5.1...v0.5.2) (2022-09-26)
+
 ### [v0.5.1](https://github.com/hoodie/toastify/compare/v0.5.0...v0.5.1) (2022-09-25)
 
 #### Fixes
