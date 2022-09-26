@@ -1,7 +1,7 @@
 [package]
 edition = '2018'
 name = "toastify"
-version = "0.5.1"
+version = "0.5.2"
 authors = ["Hendrik Sollich <hendrik@hoodie.de>"]
 description = "A commandline tool that shows desktop notifications using [notify-rust](https://docs.rs/notify-rust/)."
 
