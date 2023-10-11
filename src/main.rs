@@ -54,6 +54,9 @@ enum Commands {
         /// Set a specific app-name manually.
         #[clap(short, long)]
         app_name: Option<String>,
+        /// Set a specific sound manually.
+        #[clap(short, long)]
+        sound_name: Option<String>,
         #[cfg(all(unix, not(target_os = "macos")))]
         #[clap(flatten)]
         linux_args: LinuxArgs,
@@ -125,6 +128,7 @@ fn main() -> nResult<()> {
             title,
             body,
             app_name,
+            sound_name,
             #[cfg(all(unix, not(target_os = "macos")))]
             linux_args,
         } => {
@@ -138,6 +142,10 @@ fn main() -> nResult<()> {
 
             if let Some(appname) = app_name {
                 notification.appname(&appname);
+            }
+
+            if let Some(sound_name) = sound_name {
+                notification.sound_name(&sound_name);
             }
 
             #[cfg(all(unix, not(target_os = "macos")))]
