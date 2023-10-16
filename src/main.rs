@@ -38,6 +38,7 @@ struct Cli {
 }
 
 #[derive(Subcommand)]
+#[allow(clippy::large_enum_variant)]
 enum Commands {
     // /// Starts a little notification server for testing
     // #[cfg(all(unix, not(target_os = "macos")))]
