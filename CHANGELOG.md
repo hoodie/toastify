@@ -1,5 +1,12 @@
 # Changelog
 
+### [v0.5.3](https://github.com/hoodie/toastify/compare/v0.5.2...v0.5.3) (2023-10-16)
+
+#### Features
+
+* allows for passing of sound name.
+([b1a240e](https://github.com/hoodie/toastify/commit/b1a240ea34db756e3a0fa83e12b5716d4527e149))
+
 ### [v0.5.2](https://github.com/hoodie/toastify/compare/v0.5.1...v0.5.2) (2022-09-26)
 
 ### [v0.5.1](https://github.com/hoodie/toastify/compare/v0.5.0...v0.5.1) (2022-09-25)
@@ -7,9 +14,9 @@
 #### Fixes
 
 * show notification also on windows
-  ([54e437b](https://github.com/hoodie/toastify/commit/54e437b93519e34e0ba84baa3cf32a09f8822bd5))
+([54e437b](https://github.com/hoodie/toastify/commit/54e437b93519e34e0ba84baa3cf32a09f8822bd5))
 * change documented version to already published 0.5.0
-  ([fe1e9d7](https://github.com/hoodie/toastify/commit/fe1e9d70cc7a2f9ba93f8db7732df3d242e8af73))
+([fe1e9d7](https://github.com/hoodie/toastify/commit/fe1e9d70cc7a2f9ba93f8db7732df3d242e8af73))
 
 ## [v0.5.0](https://github.com/hoodie/toastify/compare/v0.4.0...v0.5.0) (2022-06-18)
 
