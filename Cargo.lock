@@ -1326,7 +1326,7 @@ dependencies = [
 
 [[package]]
 name = "toastify"
-version = "0.5.2"
+version = "0.5.3"
 dependencies = [
  "clap",
  "notify-rust",
