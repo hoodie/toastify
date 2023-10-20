@@ -2,7 +2,7 @@
 
 # toastify
 
-[![build](https://img.shields.io/github/actions/workflow/status/hoodie/toastify/ci.yml?branch=master)](https://github.com/hoodie/toastify/actions)
+[![build](https://img.shields.io/github/actions/workflow/status/hoodie/toastify/ci.yml?branch=main)](https://github.com/hoodie/toastify/actions)
 [![Crates.io](https://img.shields.io/crates/d/toastify)](https://crates.io/crates/toastify)
 [![contributors](https://img.shields.io/github/contributors/hoodie/toastify)](https://github.com/hoodie/toastify/graphs/contributors)
 ![maintenance](https://img.shields.io/maintenance/yes/2023)
