@@ -1,5 +1,12 @@
 # Changelog
 
+### [v0.5.4](https://github.com/hoodie/toastify/compare/v0.5.3...v0.5.4) (2023-10-20)
+
+#### Fixes
+
+* correct build badge url
+([12749aa](https://github.com/hoodie/toastify/commit/12749aa47e7043203dadbafadd557a73d8b7f440))
+
 ### [v0.5.3](https://github.com/hoodie/toastify/compare/v0.5.2...v0.5.3) (2023-10-16)
 
 #### Features
