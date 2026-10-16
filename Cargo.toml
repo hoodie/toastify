@@ -9,6 +9,11 @@ keywords = ["desktop", "notification", "notify", "dbus", "libnotify"]
 license = "MIT OR Apache-2.0"
 readme = "README.md"
 
+[dependencies]
+clap_complete = { version = "4.6.11", optional = true }
+clap_mangen = { version = "0.3.3", optional = true }
+
+
 [dependencies.notify-rust]
 version = "4.18"
 default-features = false
@@ -18,6 +23,8 @@ default = ["z"]
 d = ["notify-rust/d"]
 z = ["notify-rust/z"]
 images = ["notify-rust/images"]
+self-document = ["clap_complete", "clap_mangen"]
+clap_mangen = ["dep:clap_mangen"]
 
 [dependencies.clap]
 version = "4.6"

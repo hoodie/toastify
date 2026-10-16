@@ -1,3 +1,5 @@
+#[cfg(feature = "self-document")]
+use clap::CommandFactory;
 use clap::{Parser, Subcommand, ValueEnum};
 #[cfg(all(unix, not(target_os = "macos")))]
 use notify_rust::Hint;
@@ -62,6 +64,15 @@ enum Commands {
         #[command(flatten)]
         platform_args: PlatformArgs,
     },
+    /// Prints shell completions to stdout
+    #[cfg(feature = "self-document")]
+    Completions {
+        /// Shell to generate completions for
+        shell: clap_complete::Shell,
+    },
+    /// Prints the man page to stdout
+    #[cfg(feature = "self-document")]
+    Manpage,
 }
 
 #[derive(clap::Args)]
@@ -158,6 +169,26 @@ fn main() -> nResult<()> {
             println!("capabilities:\n {:?}\n", caps);
             Ok(())
         }
+
+        #[cfg(feature = "self-document")]
+        Commands::Completions { shell } => {
+            clap_complete::generate(
+                shell,
+                &mut Cli::command(),
+                "toastify",
+                &mut std::io::stdout(),
+            );
+            Ok(())
+        }
+
+        #[cfg(feature = "self-document")]
+        Commands::Manpage => {
+            clap_mangen::Man::new(Cli::command())
+                .render(&mut std::io::stdout())
+                .expect("Failed to write man page to stdout");
+            Ok(())
+        }
+
         Commands::Send {
             title,
             body,
