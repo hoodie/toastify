@@ -51,5 +51,6 @@ notification permission, so it's not practical for a plain CLI binary yet.
 
 ### Not supported on macOS
 
-`--urgency`, `--expire-time`, `--icon`, `--hint`, `--categories` and `--id` are
-Linux/BSD (XDG) only and have no effect on the `NSUserNotificationCenter` backend.
+`--urgency`, `--expire-time`, `--icon`, `--hint`, `--categories` and `--id` have
+no effect on the `NSUserNotificationCenter` backend and are not available on macOS.
+`--urgency` and `--expire-time` are also supported on Windows, the rest are Linux/BSD (XDG) only.

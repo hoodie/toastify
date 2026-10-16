@@ -1,5 +1,5 @@
 [package]
-edition = '2018'
+edition = '2024'
 name = "toastify"
 version = "0.5.4"
 authors = ["Hendrik Sollich <hendrik@hoodie.de>"]
