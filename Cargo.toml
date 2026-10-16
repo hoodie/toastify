@@ -6,7 +6,7 @@ authors = ["Hendrik Sollich <hendrik@hoodie.de>"]
 description = "A commandline tool that shows desktop notifications using [notify-rust](https://docs.rs/notify-rust/)."
 
 keywords = ["desktop", "notification", "notify", "dbus", "libnotify"]
-license = "MIT/Apache-2.0"
+license = "MIT OR Apache-2.0"
 readme = "README.md"
 
 [dependencies.notify-rust]
