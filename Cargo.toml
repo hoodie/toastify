@@ -20,5 +20,5 @@ z = ["notify-rust/z"]
 images = ["notify-rust/images"]
 
 [dependencies.clap]
-version = "3.0.0"
-features = [ "derive", "cargo" ]
+version = "4.6"
+features = ["derive", "cargo"]

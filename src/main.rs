@@ -1,9 +1,9 @@
-use clap::{ArgEnum, Parser, Subcommand};
+use clap::{Parser, Subcommand, ValueEnum};
 #[cfg(all(unix, not(target_os = "macos")))]
 use notify_rust::Hint;
 use notify_rust::{error::Result as nResult, Notification, Urgency};
 
-#[derive(ArgEnum, Clone, Copy)]
+#[derive(ValueEnum, Clone, Copy)]
 pub enum UrgencyShim {
     Low,
     Normal,
@@ -31,9 +31,9 @@ fn parse_hint(pattern: &str) -> Result<Hint, String> {
 }
 
 #[derive(Parser)]
-#[clap(author, version, about)]
+#[command(author, version, about)]
 struct Cli {
-    #[clap(subcommand)]
+    #[command(subcommand)]
     command: Commands,
 }
 
@@ -50,16 +50,17 @@ enum Commands {
     Send {
         /// Title of the Notification.
         title: String,
+
         /// Message body
         body: Option<String>,
         /// Set a specific app-name manually.
-        #[clap(short, long)]
+        #[arg(short, long)]
         app_name: Option<String>,
         /// Set a specific sound manually.
-        #[clap(short, long)]
+        #[arg(short, long)]
         sound_name: Option<String>,
         #[cfg(all(unix, not(target_os = "macos")))]
-        #[clap(flatten)]
+        #[command(flatten)]
         linux_args: LinuxArgs,
     },
 }
@@ -68,24 +69,30 @@ enum Commands {
 #[derive(clap::Args)]
 struct LinuxArgs {
     /// Time until expiration in milliseconds.
-    #[clap(short = 't', long)]
+    #[arg(short = 't', long)]
     expire_time: Option<i32>,
+
     /// Icon of notification.
-    #[clap(short = 'i', long)]
+    #[arg(short = 'i', long)]
     icon: Option<std::path::PathBuf>,
+
     /// Specifies the ID and overrides existing notifications with the same ID.
     id: Option<u32>, // TODO: Type is u32 or string?
+
     /// Set a category.
-    #[clap(short, long)]
+    #[arg(short, long)]
     categories: Option<Vec<String>>,
+
     /// Specifies basic extra data to pass. Valid types are int, double, string and byte. Pattern: TYPE:NAME:VALUE
-    #[clap(long, parse(try_from_str = parse_hint))]
+    #[arg(long, value_parser = parse_hint)]
     hint: Option<Hint>,
+
     /// How urgent is it.
-    #[clap(short, long, arg_enum)]
+    #[arg(short, long, value_enum)]
     urgency: Option<UrgencyShim>,
+
     /// Also prints notification to stdout
-    #[clap(short, long)]
+    #[arg(short, long)]
     debug: bool,
 }
 
