@@ -1,0 +1,96 @@
+name: Build Platforms
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  linux:
+    name: linux
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust:
+          - stable
+          - beta
+          - stable minus 5 releases
+        feature:
+          - d
+          - d,images
+          - z
+          - z,images
+          - z,d
+          - z,self-document
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ matrix.rust }}
+          components: clippy, rustfmt
+      - run: sudo apt-get install -y libdbus-1-dev
+
+      - name: check (default features)
+        run: cargo check
+
+      - name: check (${{matrix.feature}})
+        run: cargo check --no-default-features --features ${{matrix.feature}}
+
+      - name: test (${{matrix.feature}})
+        run: cargo test --no-default-features --features ${{matrix.feature}}
+
+      - name: clippy (${{matrix.feature}})
+        run: cargo clippy --no-default-features --features ${{matrix.feature}} -- -D warnings
+
+  windows:
+    name: windows
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        rust:
+          - stable
+          - beta
+          - stable minus 5 releases
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ matrix.rust }}
+          components: clippy, rustfmt
+
+      - name: check (default features)
+        run: cargo check
+
+      - name: test (default features)
+        run: cargo test --no-run
+
+      - name: clippy (default features)
+        run: cargo clippy -- -D warnings
+
+  macos:
+    name: macos
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        rust:
+          - stable
+          - beta
+          - stable minus 5 releases
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ matrix.rust }}
+          components: clippy, rustfmt
+
+      - name: check
+        run: cargo check
+
+      - name: test
+        run: cargo test --no-run
+
+      - name: clippy
+        run: cargo clippy -- -D warnings
