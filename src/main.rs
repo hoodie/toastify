@@ -1,7 +1,7 @@
 use clap::{Parser, Subcommand, ValueEnum};
 #[cfg(all(unix, not(target_os = "macos")))]
 use notify_rust::Hint;
-use notify_rust::{error::Result as nResult, Notification, Urgency};
+use notify_rust::{Notification, Urgency, error::Result as nResult};
 
 #[derive(ValueEnum, Clone, Copy)]
 pub enum UrgencyShim {
@@ -51,7 +51,7 @@ enum Commands {
         /// Title of the Notification.
         title: String,
 
-        /// Message body
+        /// Message body. Use `-` to read it from stdin.
         body: Option<String>,
         /// Set a specific app-name manually.
         #[arg(short, long)]
@@ -78,6 +78,7 @@ struct PlatformArgs {
 
     /// Specifies the ID and overrides existing notifications with the same ID.
     #[cfg(all(unix, not(target_os = "macos")))]
+    #[arg(long)]
     id: Option<u32>, // TODO: Type is u32 or string?
 
     /// Set a category.
@@ -168,7 +169,17 @@ fn main() -> nResult<()> {
 
             notification.summary(&title);
 
-            if let Some(body) = body {
+            if let Some(mut body) = body {
+                if body == "-" {
+                    body = std::io::read_to_string(std::io::stdin())
+                        .expect("Failed to read body from stdin");
+                    if body.ends_with('\n') {
+                        body.pop();
+                        if body.ends_with('\r') {
+                            body.pop();
+                        }
+                    }
+                }
                 notification.body(&body);
             }
 
@@ -212,12 +223,9 @@ fn main() -> nResult<()> {
                 }
 
                 if extra_args.debug {
-                    #[allow(deprecated)]
-                    notification.show_debug()
-                } else {
-                    notification.show()
+                    println!("{:#?}", notification);
                 }
-                .map(|_| ())
+                notification.show().map(|_| ())
             }
 
             #[cfg(any(target_os = "macos", target_os = "windows"))]
